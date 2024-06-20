@@ -3,8 +3,7 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.nc13.mappers.UserMapper">
-    <select id="auth" parameterType="userDTO"
-            resultType="userDTO">
+    <select id="auth" parameterType="userDTO" resultType="userDTO">
         SELECT * FROM user
         WHERE username = #{username} AND
         password = #{password}

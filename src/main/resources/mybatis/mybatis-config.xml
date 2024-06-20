@@ -3,8 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-config.dtd">
 <configuration>
+<!--    mapUnderscoreToCamelCase를 사용하면 DateTime이 보인-->
+    <settings>
+        <setting name="mapUnderscoreToCamelCase" value="true"/>
+    </settings>
     <typeAliases>
         <typeAlias type="com.nc13.springBoard.model.UserDTO" alias="userDTO"/>
         <typeAlias type="com.nc13.springBoard.model.BoardDTO" alias="boardDTO"/>
+        <typeAlias type="com.nc13.springBoard.model.ReplyDTO" alias="replyDTO"/>
     </typeAliases>
+<!--configuration에 순서가 정해져 있어서 setting이 typeAliases보다 올라가 있어야한다.-->
 </configuration>

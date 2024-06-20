@@ -1,4 +1,7 @@
 <%@page language="java" contentType="text/html;charset=UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+
 <html>
 <head>
     <title>게시판</title>
@@ -8,7 +11,86 @@
 <body>
 <div class="container-fluid">
     <div class="main h-100">
-        ${list}
+    <%--
+          taglib C 는 기본적으로 JSP에서 자바 코드 대신 Marked-up Language 형식으로
+          변수의 값, 조건문, 반복문 등을 출력할 수 있도록 만들어주는 태그 라이브러리이다.
+    --%>
+    <%--
+        가장 대표적으로 사용할 수 있는 Core 태그는 바로 ForEach 태그이다.
+        바로 반복문이다.
+
+        items 어트리뷰티에는 순차적으로 꺼내올 콜렉션 개체를 지정한다.
+        var 어트리뷰트는 하나씩 뽑아온 것을 뭐라고 호칭할지를 지정한다.
+        즉 아래의 forEach 태그는
+        for(BoardDTO b : list) {
+        }
+        와 같은 의미가 된다.
+
+        fmt 는 formatter와 관련된 태그이다.
+        주로 시간을 포맷을 정할 때 사용된다.
+    --%>
+        <div class="row justify-content-center">
+            <div class="col-8 text-center">
+                <table class="table table-striped">
+                    <tr>
+                        <th>글 번호</th>
+                        <th colspan="1"> 제목 </th>
+                        <th> 작성자 </th>
+                        <th> 작성일 </th>
+                    </tr>
+                    <c:forEach items="${list}" var="b">
+                        <tr onclick="javascript:location.href='/board/showOne/${b.id}'">
+                            <td>${b.id}</td>
+                            <td conspen="1">${b.title}</td>
+                            <td>${b.nickname}</td>
+                            <td><fmt:formatDate value="${b.entryDate}" pattern="yyMMdd HH:mm:ss"/></td>
+                        </tr>
+                    </c:forEach>
+                    <tr>
+                        <td colspan="6" class="text-center">
+                            <ul class="pagination justify-content-center" >
+                                <li class="page-item">
+                                    <a class="page-link" href="/board/showAll/1"> << </a>
+                                </li>
+                                <c:if test ="${curPage > 5}">
+                                    <li class="page-item">
+                                        <a href="/board/showAll/${curPage - 5}" class="page-link"> < </a>
+                                    </li>
+                                </c:if>
+                                <c:forEach var="page" begin="${startPage}" end="${endPage}">
+                                    <c:choose>
+                                        <c:when test="${page eq curPage}">
+                                            <%--                                        <a href="/board/showAll/${page}">[${page}]</a>--%>
+                                            <li class="page-item">
+                                                <spen class="page-link">${page}</spen>
+                                            </li>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <li class="page-item">
+                                                <a href="/board/showAll/${page}" class="page-link"> ${page}</a>
+                                            </li>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </c:forEach>
+                                <c:if test="${curPage < maxPage - 5}">
+                                    <li class="page-item">
+                                        <a href="/board/showAll/${curPage + 5}" class="page-link"> > </a>
+                                    </li>
+                                </c:if>
+                                <li class="page-item">
+                                    <a href="/board/showAll/${maxPage}" class="page-link"> >> </a>
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div class="row justify-content-end">
+            <div class="col-3">
+                <a class="btn btn-outline-success" href="/board/write">글 작성하기</a>
+            </div>
+        </div>
     </div>
 </div>
 </body>
