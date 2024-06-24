@@ -12,10 +12,17 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/board/")
@@ -30,6 +37,9 @@ public class BoardController {
         return "redirect:/board/showAll/1";
     }
 
+    //HttpSession - > 세션을 관리하기 위해 파라미터로 넣어줌
+    // Model : Parameter로 선언만 해주면 bean 객체가 스프링이 알아서 만들어주고 관리해준다.
+    // @PathVariable("변수명") {pageNo} - > @PathVariable int pageNo
     @GetMapping("showAll/{pageNo}")
     public String showAll(HttpSession session, Model model, @PathVariable int pageNo) {
         UserDTO logIn = (UserDTO) session.getAttribute("logIn");
@@ -218,6 +228,56 @@ public class BoardController {
 
         boardService.delete(id);
         return "redirect:/board/showAll";
+    }
+
+    // 일반 컨트롤러 안에
+    // Restful API, JSON의 결곽밧을 리턴해야하는 경우
+    // 맵핑 어노테이션 위에 ResponseBody 어노테이션을 붙여준다.
+
+
+    // 주소로 반환하는 것이 아닌 Map의 결과값을 write.jsp에 리턴한다. (upload의 결과값을 전달)
+
+    // MultipartHttpServletRequest Spring에서 파일을 업로드, 사진을 등록하기 위해서 작업 과정에 필요함
+    // request값을 담고 있으면서, input의 file 또한 담아서 파일을 공유
+    // getName : 파일의 이름을 구함
+    // getOriginsFilename(): 업로드한 파일의 실제이름을 구함
+    // transferTo(Filedest) : 업로드한 파일 데이터를 지정한 파일에 저장한다.
+    @ResponseBody
+    @PostMapping("uploads")
+    public Map<String, Object> uploads(MultipartHttpServletRequest request) {
+        Map<String, Object> resultMap = new HashMap<>();
+
+        String uploadPath = "";
+
+        MultipartFile file = request.getFile("upload");
+        String fileName = file.getOriginalFilename();
+        String extension = fileName.substring(fileName.lastIndexOf("."));
+        String uploadName = UUID.randomUUID() + extension;
+
+        // 톰켓에 돌아가는 주소값을 찾는 메소드? 방법
+        String realPath = request.getServletContext().getRealPath("/board/uploads/");
+        Path realDir = Paths.get(realPath);
+        if(!Files.exists(realDir)) {
+            try{
+                Files.createDirectories(realDir);
+            } catch(IOException e){
+                e.printStackTrace();
+            }
+        }
+
+        File uploadFile = new File(realPath + uploadName);
+        try {
+            file.transferTo(uploadFile);
+        } catch (IOException e) {
+            System.out.println("파일 전송 중 에러");
+            e.printStackTrace();
+        }
+
+        uploadPath = "/board/uploads/" + uploadName;
+
+        resultMap.put("uploaded", true);
+        resultMap.put("url", uploadPath);
+        return resultMap;
     }
 
 
